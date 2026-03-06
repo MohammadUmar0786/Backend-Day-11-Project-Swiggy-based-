@@ -118,6 +118,18 @@ app.delete('/admin/:id',(req,res)=>{
     res.status(200).send("Item deleted successfully");
 })
 
+// User:
+
+// Add item to cart:
+const addedToCart = [];
+app.post('/user/:id',(req,res)=>{
+  const id = parseInt(req.params.id);
+  const food = foodItems.find(item=> item.id ===id);
+  addedToCart.push(food);
+  console.log(addedToCart)
+  res.status(200).send("Item added in the cart successfully!")
+})
+
 // Listen at a port no.
 app.listen(3000,()=>{
     console.log("Listening at a port no. 3000");
