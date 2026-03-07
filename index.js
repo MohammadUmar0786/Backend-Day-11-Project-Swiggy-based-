@@ -121,16 +121,26 @@ app.delete('/admin/:id',(req,res)=>{
 // User:
 
 // Add item to cart:
-const addedToCart = [];
+const itemsInCart = [];
 app.post('/user/:id',(req,res)=>{
   const id = parseInt(req.params.id);
   const food = foodItems.find(item=> item.id ===id);
-  addedToCart.push(food);
-  console.log(addedToCart)
+  itemsInCart.push(food);
+  console.log(itemsInCart)
   res.status(200).send("Item added in the cart successfully!")
+})
+
+// Delete item from cart:
+app.delete('/user/:id', (req,res)=>{
+  const id = req.params.id;
+  const index = itemsInCart.findIndex(item=> item.id ===id);
+  itemsInCart.splice(index,1);
+  console.log(itemsInCart)
+  res.send("Delete item successfully");
 })
 
 // Listen at a port no.
 app.listen(3000,()=>{
     console.log("Listening at a port no. 3000");
 })
+
