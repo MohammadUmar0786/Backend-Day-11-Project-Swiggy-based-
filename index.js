@@ -1,5 +1,4 @@
-// Project: Admin + User (Like:- Swiggy/Zomato): With "status code" also.
-
+// Project: Admin + User (Like:- Swiggy/Zomato): With "status code" & "try-catch" block also.
 const { auth } = require('./middleware/auth'); // CommonJS way
 
 // Import express using http module
@@ -91,56 +90,127 @@ app.use('/admin', auth)  // auth => will be coded in different file (Folder=> Mi
 
 // Get all info of food items (Admin & Client user)
 app.get('/food',(req,res)=>{
+  try{
     // No need of authentication in this case
-    res.send(foodItems)
+    res.status(200).send(foodItems)
+  }catch(err){
+    res.status(500).send('Some error:'+err);
+  }
+    
 })
 
 // Admin:
+
 // Add any new food item in menu
 app.post('/admin',(req,res)=>{
+  try{
     foodItems.push(req.body);
-    res.status(201).send("Item added successfully"); // Status code also can be 200 (Ok), but just tried new code, as ok one will be added by default also.
+    res.status(200).send("Item added successfully"); // Status code also can be 200 (Ok), but just tried new code, as ok one will be added by default also.
+  }
+  catch(err){
+    res.status(500).send("Some error:"+err);
+  }
 })
 
 // Update food items detail
 app.patch('/admin',(req,res)=>{
+  try{
     const id = req.body.id;
     const FoodData = foodItems.find(food => food.id === id);
-    FoodData.price = req.body.price; // Replaced updated data
-    res.status(200).send("Item info updated successfully");
+    if(FoodData){
+      if(req.body)
+      FoodData.price = req.body.price; // Replaced updated data
+      res.status(200).send("Item info updated successfully");
+    }
+    else{
+      res.status(404).send("Item not exist")
+    }
+  } catch(err){
+    res.status(500).send("Some Error:"+err);
+  }
+    
 })
 
 // Delete any food item
 app.delete('/admin/:id',(req,res)=>{
+
+  try{
     const id = parseInt(req.params.id);
     const index = foodItems.findIndex(food=> food.id === id); // find index
+
+    if(index === -1){
+      return res.status(404).send("Item not exist in menu")
+    }
+    else{
     foodItems.splice(index,1); // deleted 1 item from that index
     res.status(200).send("Item deleted successfully");
+    }
+  }
+  catch(err){
+    return res.status(500).send("Some error:"+err); // Without return, Express may try to continue executing code.
+  }
+      
 })
 
 // User:
+const itemsInCart = [];
+
+// View items in cart:
+app.get('/user',(req,res)=>{
+
+  try{
+    if(itemsInCart.length==0){
+    res.send("Cart is empty");
+  }
+  else{
+  res.send(itemsInCart);
+  }
+  }catch(err){
+    res.status(500).status("Some error:"+err)''
+  }
+})
 
 // Add item to cart:
-const itemsInCart = [];
 app.post('/user/:id',(req,res)=>{
-  const id = parseInt(req.params.id);
-  const food = foodItems.find(item=> item.id ===id);
-  itemsInCart.push(food);
-  console.log(itemsInCart)
-  res.status(200).send("Item added in the cart successfully!")
+
+  try{
+    const id = parseInt(req.params.id);
+    const food = foodItems.find(item=> item.id ===id);
+
+    if(foodItems){
+    itemsInCart.push(food);
+    console.log(itemsInCart)
+    res.status(200).send("Item added in the cart successfully!");
+    }
+    else{
+    res.status(404).send("Item out of stock");
+    }
+  }catch(err){
+    res.status(500).send("Some error:"+err);
+  }
 })
 
 // Delete item from cart:
 app.delete('/user/:id', (req,res)=>{
-  const id = req.params.id;
-  const index = itemsInCart.findIndex(item=> item.id ===id);
-  itemsInCart.splice(index,1);
-  console.log(itemsInCart)
-  res.send("Delete item successfully");
+
+  try{
+    const id = parseInt(req.params.id);
+    const index = itemsInCart.findIndex(item=> item.id ===id);
+
+    if(index!=-1){
+      itemsInCart.splice(index,1);
+      console.log(itemsInCart)
+      res.status(200).send("Item Delete Successfully ");
+    }
+    else{
+      res.status(400).send("Item not present in cart")
+    }
+  }catch(err){
+    res.status(500).send("Some error:"+err);
+  }
 })
 
 // Listen at a port no.
 app.listen(3000,()=>{
     console.log("Listening at a port no. 3000");
 })
-
